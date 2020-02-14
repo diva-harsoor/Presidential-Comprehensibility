@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Understanding Presidential Speeches</title>
+  <meta charset="UTF-8">
+  <!-- <link type="text/css" rel="stylesheet" href="visualization_template_MC.css"/> -->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+
+  <style>
+  body {
+    font-family: Times;
+  }
+
+  h1 {
+    font-weight: lighter;
+    font-family: Helvetica;
+    text-align: center;
+    color: #110eb7;
+  }
+
+  div p {
+    font-size: 14px;
+    width: 900px;
+    margin: auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  #container {
+    width: 900px;
+    height: 600px;
+    background-color: #ffd1d1;
+    margin: auto;
+  }
+</style>
+
+</head>
+
+<body>
+
+  <h1> Could You Have Understood a Presidential Speech in the 1800s? </h1>  
+
+  <div><p>The chart below plots the reading levels of presidential inaugural addresses from George Washington's in 1789 to Donald Trump's in 2017. The reading level was measured with the Flesch-Kincaid test, which uses sentence and word length to determine difficulty of reading by grade level. There is a clear downward trend in difficulty, but it is certainly not perfectly linear. Mouse over the bars to explore more. </p></div>
+
+  <div  id="container"> </div>
+  <div><p> 
+    So does this chart a sign that the American public is getting dumber? It may actually mean the opposite. The Flesh-Kincaid reading ease test is traditionally used by educators and the media to make sure the appropriate audience can understand the text. The high graduate level reading levels of  speeches of the past signify that only the highly educated were meant to understand them. Maybe this chart is shows a sharp downward trend in the comprehension abilities of the American populace, but it is more likely a positive sign, a sign that presidential communication has become more democratic.
+  </p></div>
+
+  <script> 
+      const width = 900,
+      height = 600,
+      // margin = {
+      //     top: 10,
+      //     bottom: 100,
+      //     left: 100,
+      //     right: 10,
+      // };
+
+      margin = {
+          top: -10,
+          bottom: -10,
+          left: -10,
+          right: -10,
+      };
+
+      d3.csv("inaugural_grades.csv", function(data) {
+      
+        var max = 0;
+        for (i = 0; i < data.length; i++) {
+          if (parseFloat(data[i]['grade']) > max) {
+            max = parseFloat(data[i]['grade']);
+          }
+        }
+
+        var svg = d3.select("#container")
+        .append("svg") 
+        .attr("width", width) 
+        .attr("height", height)
+        .attr("margin-bottom", "50px")
+        .attr("overflow", "visible")
+
+        shift = 0
+        svg.selectAll("rect")
+          .data(data)
+          .enter() 
+          .append("rect")
+          .style('fill', '#d31717')
+          .attr("x", function(d) {
+            shift += width/data.length;
+            return shift;})
+          .attr("y", function(d) {return height + 10 - parseFloat(d['grade']) * (height/max)})
+          .attr("width", 10)
+          .attr("height", function(d) {return parseFloat(d['grade']) * (height/max)})
+          .on("mouseover", function(d, i) {
+            // console.log(d.president);
+            d3.selectAll("#hover-text")
+              .remove();
+            svg.append("text")
+              .attr("x", 600)
+              .attr("y", 150)
+              .attr("id", "hover-text")
+              .text(d.president + ": " + d.grade)
+              .style("font-weight", "lighter")
+              .style("font-size", "18px")
+              .style("stroke", "#110eb7")
+              .style("font-family", "Helvetica")
+          })
+
+
+        xAxis = d3.scaleLinear()
+            .domain([1789, 2018])
+            .range([margin.left, width - margin.right])
+
+        yAxis = d3.scaleLinear()
+            .domain([0, 28])
+            .range([margin.left, width - margin.right])
+
+        svg.append("g")
+            .attr("transform",`translate(${0}, ${height - margin.bottom})`)
+            .call(d3.axisBottom(xAxis).ticks(59))
+            .style("stroke", "#0d0b70")
+            .style("padding", "20px");
+
+        svg.append("text")
+            .attr("transform",`translate(${width / 2}, ${height - (margin.bottom / 2)})`)
+            .text('Year')
+            .style("fill", "#0d0b70")
+            .style("font-size", "14px")
+            .style("padding", "20px");
+
+        svg.append("g")
+            .attr("transform", `translate(${margin.left}, ${0})`)
+            .call(d3.axisLeft(yAxis).ticks(10))
+            .style("stroke", "#0d0b70")
+            .style("padding", "20px");
+
+
+        svg.append("text")
+            .attr("transform",`translate(${margin.left / 2}, ${height / 2}) rotate(-90) `)
+            .text('Grade')
+            .style("fill", "#0d0b70")
+            .style("font-size", "14px")
+            .style("padding", "20px");
+
+
+      })
+
+
+
+  </script>
+
+</body>
+
+</html>
+    
